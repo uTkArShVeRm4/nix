@@ -1,0 +1,155 @@
+{
+
+  description = "My Darwin system flake";
+
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nix-darwin.url = "github:LnL7/nix-darwin";
+    nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
+    nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
+  };
+
+  outputs = inputs@{ self, nix-darwin, nixpkgs, nix-homebrew,... }:
+  let
+    configuration = { pkgs, config, ... }: {
+
+      nixpkgs.config.allowUnfree = true;
+      nixpkgs.config.allowBroken = true;
+      # List packages installed in system profile. To search by name, run:
+      # $ nix-env -qaP | grep wget
+      homebrew = {
+          enable = true;
+          # brews = [
+          #   "asdf"
+          # ];
+          casks = [
+            "nikitabobko/tap/aerospace"
+            "jandedobbeleer/oh-my-posh/oh-my-posh"
+            "ghostty"
+            "legcord"
+          ];
+          onActivation.cleanup = "zap";
+        };
+      environment.systemPackages =
+        [ pkgs.neovim
+          pkgs.tree
+          pkgs.fastfetch
+          pkgs.yazi
+          pkgs.kitty
+          pkgs.fish
+          pkgs.nushell
+          pkgs.tmux
+          pkgs.httpie
+          pkgs.stow
+          pkgs.carapace
+          pkgs.bat
+          pkgs.lazygit
+          pkgs.btop
+          pkgs.fzf
+          pkgs.jq
+          pkgs.fd
+          pkgs.ripgrep
+          pkgs.eza
+          pkgs.zoxide
+          pkgs.starship
+          pkgs.pass
+          pkgs.tmux-sessionizer
+          pkgs.gh
+          pkgs.cmatrix
+          pkgs.ffmpeg
+          pkgs.inetutils
+          pkgs.socat
+          pkgs.pywal16
+          pkgs.glow
+          pkgs.gnupg
+
+          pkgs.awscli2
+
+          pkgs.nodePackages.npm
+          pkgs.go
+          pkgs.zig
+          pkgs.uv
+            
+          pkgs.cmake
+          pkgs.glfw
+          pkgs.ninja
+          pkgs.llvm
+          pkgs.pkg-config
+          pkgs.libGL
+          pkgs.qemu
+
+        ];
+
+      fonts.packages = [
+          pkgs.nerd-fonts.jetbrains-mono
+        ];
+
+      system.activationScripts.applications.text = let
+        env = pkgs.buildEnv {
+          name = "system-applications";
+          paths = config.environment.systemPackages;
+          pathsToLink = "/Applications";
+        };
+      in
+        pkgs.lib.mkForce ''
+        # Set up applications.
+        echo "setting up /Applications..." >&2
+        rm -rf /Applications/Nix\ Apps
+        mkdir -p /Applications/Nix\ Apps
+        find ${env}/Applications -maxdepth 1 -type l -exec readlink '{}' + |
+        while read src; do
+          app_name=$(basename "$src")
+          echo "copying $src" >&2
+          ${pkgs.mkalias}/bin/mkalias "$src" "/Applications/Nix Apps/$app_name"
+        done
+            '';
+
+      # Auto upgrade nix package and the daemon service.
+      # services.nix-daemon.enable = true;
+      # services.skhd.enable = true;
+      # nix.package = pkgs.nix;
+
+      # Necessary for using flakes on this system.
+      nix.settings.experimental-features = "nix-command flakes";
+
+      # Enable alternative shell support in nix-darwin.
+      # programs.fish.enable = true;
+
+      # Set Git commit hash for darwin-version.
+      system.configurationRevision = self.rev or self.dirtyRev or null;
+
+      # Used for backwards compatibility, please read the changelog before changing.
+      # $ darwin-rebuild changelog
+      system.stateVersion = 5;
+
+      # The platform the configuration will be used on.
+      nixpkgs.hostPlatform = "aarch64-darwin";
+    };
+  in
+  {
+    # Build darwin flake using:
+    # $ darwin-rebuild build --flake .#Utkarshs-MacBook-Pro
+    darwinConfigurations."Utkarshs-MacBook-Pro" = nix-darwin.lib.darwinSystem {
+      modules = [ 
+          configuration 
+          nix-homebrew.darwinModules.nix-homebrew
+          {
+            nix-homebrew = {
+              enable = true;
+              enableRosetta = true;
+              user = "utkarshverma";
+              # autoMigrate = true;
+            #   taps = {
+            #     "homebrew/homebrew-core" = homebrew-core;
+            #     "homebrew/homebrew-cask" = homebrew-cask;
+            #     "koekeishiya/formulae" = homebrew-koekeishiya;
+            #   };
+            };
+        }
+      ];
+    };
+
+    # Expose the package set, including overlays, for convenience.
+    darwinPackages = self.darwinConfigurations."Utkarshs-MacBook-Pro".pkgs;
+  };
+}
