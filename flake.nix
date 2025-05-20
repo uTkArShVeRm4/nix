@@ -32,6 +32,8 @@
         };
       environment.systemPackages =
         [ pkgs.neovim
+          pkgs.rust-analyzer
+          pkgs.brave
           pkgs.tree
           pkgs.fastfetch
           pkgs.yazi
@@ -69,7 +71,7 @@
           pkgs.go
           pkgs.zig
           pkgs.uv
-            
+
           pkgs.cmake
           pkgs.glfw
           pkgs.ninja
@@ -78,32 +80,35 @@
           pkgs.libGL
           pkgs.qemu
 
+          pkgs.scrcpy
+          pkgs.ruff
+
         ];
 
       fonts.packages = [
           pkgs.nerd-fonts.jetbrains-mono
+          pkgs.nerd-fonts.roboto-mono
         ];
 
       system.activationScripts.applications.text = let
-        env = pkgs.buildEnv {
-          name = "system-applications";
-          paths = config.environment.systemPackages;
-          pathsToLink = "/Applications";
-        };
-      in
-        pkgs.lib.mkForce ''
+      env = pkgs.buildEnv {
+        name = "system-applications";
+        paths = config.environment.systemPackages;
+        pathsToLink = "/Applications";
+      };
+    in
+      pkgs.lib.mkForce ''
         # Set up applications.
         echo "setting up /Applications..." >&2
         rm -rf /Applications/Nix\ Apps
         mkdir -p /Applications/Nix\ Apps
         find ${env}/Applications -maxdepth 1 -type l -exec readlink '{}' + |
-        while read src; do
+        while IFS= read -r src; do
           app_name=$(basename "$src")
           echo "copying $src" >&2
           ${pkgs.mkalias}/bin/mkalias "$src" "/Applications/Nix Apps/$app_name"
         done
-            '';
-
+      '';
       # Auto upgrade nix package and the daemon service.
       # services.nix-daemon.enable = true;
       # services.skhd.enable = true;
@@ -113,7 +118,7 @@
       nix.settings.experimental-features = "nix-command flakes";
 
       # Enable alternative shell support in nix-darwin.
-      # programs.fish.enable = true;
+      programs.fish.enable = true;
 
       # Set Git commit hash for darwin-version.
       system.configurationRevision = self.rev or self.dirtyRev or null;
@@ -130,8 +135,8 @@
     # Build darwin flake using:
     # $ darwin-rebuild build --flake .#Utkarshs-MacBook-Pro
     darwinConfigurations."Utkarshs-MacBook-Pro" = nix-darwin.lib.darwinSystem {
-      modules = [ 
-          configuration 
+      modules = [
+          configuration
           nix-homebrew.darwinModules.nix-homebrew
           {
             nix-homebrew = {
