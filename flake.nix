@@ -19,9 +19,11 @@
       # $ nix-env -qaP | grep wget
       homebrew = {
           enable = true;
-          # brews = [
-          #   "asdf"
-          # ];
+          brews = [
+            "kanata"
+            "sshx"
+            "rustup"
+          ];
           casks = [
             "nikitabobko/tap/aerospace"
             "jandedobbeleer/oh-my-posh/oh-my-posh"
@@ -32,6 +34,8 @@
         };
       environment.systemPackages =
         [ pkgs.neovim
+          pkgs.arc-browser
+          pkgs.raycast
           pkgs.rust-analyzer
           pkgs.brave
           pkgs.tree
@@ -53,7 +57,7 @@
           pkgs.ripgrep
           pkgs.eza
           pkgs.zoxide
-          pkgs.starship
+          # pkgs.starship
           pkgs.pass
           pkgs.tmux-sessionizer
           pkgs.gh
@@ -61,7 +65,7 @@
           pkgs.ffmpeg
           pkgs.inetutils
           pkgs.socat
-          pkgs.pywal16
+          # pkgs.pywal16
           pkgs.glow
           pkgs.gnupg
 
@@ -82,6 +86,8 @@
 
           pkgs.scrcpy
           pkgs.ruff
+          pkgs.warp-terminal
+          pkgs.asciiquarium-transparent
 
         ];
 
@@ -109,9 +115,21 @@
           ${pkgs.mkalias}/bin/mkalias "$src" "/Applications/Nix Apps/$app_name"
         done
       '';
+
+      system.defaults = {
+        dock.autohide = true;
+                    dock.persistent-apps = [
+                        "${pkgs.kitty}/Applications/Kitty.app"
+                        "${pkgs.arc-browser}/Applications/Arc.app"
+                        "Applications/Legcord.app"
+                    ];
+        finder.FXPreferredViewStyle = "clmv";
+        loginwindow.GuestEnabled = false;
+        NSGlobalDomain.KeyRepeat = 2;
+        NSGlobalDomain.AppleInterfaceStyle = "Dark";
+      };
       # Auto upgrade nix package and the daemon service.
       # services.nix-daemon.enable = true;
-      # services.skhd.enable = true;
       # nix.package = pkgs.nix;
 
       # Necessary for using flakes on this system.
