@@ -33,6 +33,8 @@
             "legcord"
           ];
           onActivation.cleanup = "zap";
+          onActivation.upgrade = true;
+          onActivation.autoUpdate = true;
         };
       environment.systemPackages =
         [ pkgs.neovim
