@@ -23,6 +23,8 @@
             "kanata"
             "sshx"
             "rustup"
+            "openssl"
+            "rust-analyzer"
           ];
           casks = [
             "nikitabobko/tap/aerospace"
@@ -34,9 +36,9 @@
         };
       environment.systemPackages =
         [ pkgs.neovim
+          pkgs.discord
           pkgs.arc-browser
           pkgs.raycast
-          pkgs.rust-analyzer
           pkgs.brave
           pkgs.tree
           pkgs.fastfetch
@@ -59,7 +61,8 @@
           pkgs.zoxide
           # pkgs.starship
           pkgs.pass
-          pkgs.tmux-sessionizer
+          pkgs.podman
+          pkgs.podman-compose
           pkgs.gh
           pkgs.cmatrix
           pkgs.ffmpeg
@@ -68,8 +71,10 @@
           # pkgs.pywal16
           pkgs.glow
           pkgs.gnupg
+          pkgs.direnv
 
           pkgs.awscli2
+          pkgs.cloudflared
 
           pkgs.nodePackages.npm
           pkgs.go
