@@ -1,5 +1,4 @@
 {
-
   description = "My Darwin system flake";
 
   inputs = {
@@ -15,8 +14,9 @@
 
       nixpkgs.config.allowUnfree = true;
       nixpkgs.config.allowBroken = true;
-      # List packages installed in system profile. To search by name, run:
-      # $ nix-env -qaP | grep wget
+
+      system.primaryUser = "utkarshverma";
+
       homebrew = {
           enable = true;
           brews = [
@@ -88,13 +88,18 @@
           pkgs.ninja
           pkgs.llvm
           pkgs.pkg-config
-          pkgs.libGL
           pkgs.qemu
 
           pkgs.scrcpy
           pkgs.ruff
           pkgs.warp-terminal
-          pkgs.asciiquarium-transparent
+
+          pkgs.xh
+          pkgs.hyperfine
+          pkgs.tokei
+          pkgs.just
+          pkgs.presenterm
+          pkgs.tmux-sessionizer
 
         ];
 
@@ -183,3 +188,4 @@
     darwinPackages = self.darwinConfigurations."Utkarshs-MacBook-Pro".pkgs;
   };
 }
+
