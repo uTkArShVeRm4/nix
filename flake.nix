@@ -25,6 +25,7 @@
             "rustup"
             "openssl"
             "rust-analyzer"
+            "trash"
           ];
           casks = [
             "nikitabobko/tap/aerospace"
@@ -61,6 +62,7 @@
           pkgs.ripgrep
           pkgs.eza
           pkgs.zoxide
+          pkgs.zed-editor
           # pkgs.starship
           pkgs.pass
           pkgs.podman
